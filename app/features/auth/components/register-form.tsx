@@ -116,7 +116,7 @@ const RegisterForm = () => {
                   />
 
                   <Button type="submit" className="w-full" disabled={isPending}>
-                    Login
+                    Signup
                   </Button>
                 </div>
 

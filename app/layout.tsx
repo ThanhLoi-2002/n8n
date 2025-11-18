@@ -21,7 +21,7 @@ export default function RootLayout({
       <body className={`${outfit.className}`}>
         <TRPCReactProvider>
           {children}
-          <Toaster />{" "}
+          <Toaster position="top-right"/>{" "}
         </TRPCReactProvider>
       </body>
     </html>

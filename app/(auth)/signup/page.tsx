@@ -1,10 +1,10 @@
-import RegisterForm from '@/app/features/auth/components/register-form'
-import React from 'react'
-
-const Page = () => {
+import RegisterForm from "@/app/features/auth/components/register-form";
+import { requireUnauth } from "@/lib/auth-utils";
+const Page = async () => {
+  await requireUnauth();
   return (
-    <div><RegisterForm/></div>
-  )
-}
+      <RegisterForm />
+  );
+};
 
-export default Page
+export default Page;

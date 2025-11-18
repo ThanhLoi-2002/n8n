@@ -9,12 +9,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import FormInput from "../../shared/input/form-input";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import Image from "next/image";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email address"),
@@ -24,6 +26,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginForm = () => {
+    const router = useRouter();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -32,7 +35,23 @@ const LoginForm = () => {
     },
   });
 
-  const onSubmit = async (value: LoginFormValues) => {};
+  const onSubmit = async (values: LoginFormValues) => {
+    await authClient.signIn.email(
+      {
+        email: values.email,
+        password: values.password,
+        callbackURL: "/",
+      },
+      {
+        onSuccess: () => {
+          router.push('/');
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message)
+        }
+      }
+    );
+  };
 
   const isPending = form.formState.isSubmitting;
   return (
@@ -53,6 +72,7 @@ const LoginForm = () => {
                     type="button"
                     disabled={isPending}
                   >
+                    <Image src='/logos/github.svg' width={20} height={20} alt=''/>
                     Continue with Github
                   </Button>
                   <Button
@@ -61,6 +81,7 @@ const LoginForm = () => {
                     type="button"
                     disabled={isPending}
                   >
+                    <Image src='/logos/google.svg' width={20} height={20} alt=''/>
                     Continue with Google
                   </Button>
                 </div>
