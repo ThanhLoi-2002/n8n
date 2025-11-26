@@ -1,11 +1,12 @@
 import React from "react";
 
 interface Props {
-  params: { workflowId: string };
+  params: Promise<{ workflowId: string }>;
 }
 
-const Page = ({ params }: Props) => {
-  const { workflowId } = params;
+const Page = async ({ params }: Props) => {
+  const { workflowId } = await params;
+
   return <div>Workflow Id: {workflowId}</div>;
 };
 

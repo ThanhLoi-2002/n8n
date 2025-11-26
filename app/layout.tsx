@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import { TRPCReactProvider } from "./trpc/client";
 import { Toaster } from "sonner";
+import { NuqsAdapter } from "nuqs/adapters/next/pages";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -19,10 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${outfit.className}`}>
-        <TRPCReactProvider>
-          {children}
-          <Toaster position="top-right"/>{" "}
-        </TRPCReactProvider>
+        <NuqsAdapter>
+          <TRPCReactProvider>
+            {children}
+            <Toaster position="top-right" />{" "}
+          </TRPCReactProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );
