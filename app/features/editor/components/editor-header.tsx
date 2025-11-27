@@ -1,0 +1,135 @@
+"use client";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SaveIcon } from "lucide-react";
+import Link from "next/link";
+import {
+  useSuspenseWorkflow,
+  useUpdateWorkflowName,
+} from "../../workflows/hooks/use-workflows";
+import { useEffect, useRef, useState } from "react";
+import { Input } from "@/components/ui/input";
+
+interface Props {
+  workflowId: string;
+}
+
+export const EditorSaveButton = ({ workflowId }: Props) => {
+  return (
+    <div className="ml-auto">
+      <Button size="sm" onClick={() => {}} disabled={false}>
+        <SaveIcon className="size-4" />
+        Save
+      </Button>
+    </div>
+  );
+};
+
+export const EditorNameInput = ({ workflowId }: Props) => {
+  const { data: workflow } = useSuspenseWorkflow(workflowId);
+  const updateWorkflow = useUpdateWorkflowName();
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(workflow?.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (workflow.name) {
+      setName(workflow.name);
+    }
+  }, [workflow.name]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleSave = async () => {
+    if (name == workflow.name) {
+      setIsEditing(false);
+      return;
+    }
+
+    setIsEditing(false);
+
+    try {
+      await updateWorkflow.mutateAsync({
+        id: workflowId,
+        name,
+      });
+    } catch {
+      setName(workflow.name);
+    }
+  };
+
+  const handleKeyDown = (e: any) => {
+    if (e.key == "Enter") {
+      handleSave();
+    } else if (e.key == "Escape") {
+      setName(workflow.name);
+      setIsEditing(false);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <Input
+        disabled={updateWorkflow.isPending}
+        ref={inputRef}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onBlur={handleSave}
+        onKeyDown={handleKeyDown}
+        className="h-7 w-auto min-w-[100px] px-2"
+      />
+    );
+  }
+  return (
+    <BreadcrumbItem
+      onClick={() => setIsEditing(true)}
+      className="cursor-pointer hover:text-foreground transition-colors"
+    >
+      {workflow.name}
+    </BreadcrumbItem>
+  );
+};
+
+export const EditorBreadCrumbs = ({ workflowId }: Props) => {
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link prefetch href={"/workflows"}>
+              Workflow
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <EditorNameInput workflowId={workflowId} />
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+};
+
+const EditorHeader = ({ workflowId }: Props) => {
+  return (
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 bg-background">
+      <SidebarTrigger />
+      <div className="flex justify-between items-center w-full">
+        <EditorBreadCrumbs workflowId={workflowId} />
+        <EditorSaveButton workflowId={workflowId} />
+      </div>
+    </header>
+  );
+};
+
+export default EditorHeader;

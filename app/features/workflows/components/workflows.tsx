@@ -43,8 +43,9 @@ const WorkflowList = () => {
   return (
     <EntityList
       items={workflows.data.items}
-      getKey={(workflow) => workflow.id}
+      getKey={(workflow: any) => workflow.id}
       renderItem={(workflow) => <WorkflowItem data={workflow}/>}
+      emptyView={<WorkflowsEmpty/>}
     />
   );
 };
