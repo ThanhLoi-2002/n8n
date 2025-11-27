@@ -2,7 +2,7 @@
 import { NodeType } from "@/lib/generated/prisma";
 import { createId } from "@paralleldrive/cuid2";
 import { MousePointerIcon, GlobeIcon } from "lucide-react";
-import { ComponentType, ReactNode } from "react";
+import { ComponentType, ReactNode, useCallback } from "react";
 import {
   Sheet,
   SheetContent,
@@ -12,6 +12,8 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import { Separator } from "./ui/separator";
+import { useReactFlow } from "@xyflow/react";
+import { toast } from "sonner";
 
 export type NodeTypeOption = {
   type: NodeType;
@@ -46,6 +48,50 @@ interface Props {
 }
 
 const NodeSelector = ({ children, onOpenChange, open }: Props) => {
+  const { setNodes, getNodes, screenToFlowPosition } = useReactFlow();
+
+  const handleNodeSelect = useCallback((selection: NodeTypeOption) => {
+    if (selection.type === NodeType.MANUAL_TRIGGER) {
+      const nodes = getNodes();
+      const hasManualTrigger = nodes.some(
+        (node) => node.type === NodeType.MANUAL_TRIGGER
+      );
+
+      if (hasManualTrigger) {
+        toast.error("Only one manual trigger is allowed per workflow");
+        return
+      }
+    }
+
+    setNodes((nodes) => {
+      const hasInitialTrigger = nodes.some(
+        (node) => node.type === NodeType.INITIAL
+      );
+
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      const flowPosition = screenToFlowPosition({
+        x: centerX + (Math.random() - 0.5) * 200,
+        y: centerY + (Math.random() - 0.5) * 200,
+      });
+
+      const newNode = {
+        id: createId(),
+        data: {},
+        position: flowPosition,
+        type: selection.type,
+      };
+
+      if (hasInitialTrigger) {
+        return [newNode];
+      }
+
+      return [...nodes, newNode];
+    });
+
+    onOpenChange(false);
+  }, []);
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{children}</SheetTrigger>
@@ -63,7 +109,7 @@ const NodeSelector = ({ children, onOpenChange, open }: Props) => {
               <div
                 key={nodeType.type}
                 className="w-full justify-start h-auto py-5 px-4 rounded-none cursor-pointer border-l-2 border-transparent hover:border-l-primary"
-                onClick={() => {}}
+                onClick={() => handleNodeSelect(nodeType)}
               >
                 <div className="flex items-center gap-6 w-full overflow-hidden">
                   {typeof Icon == "string" ? (
@@ -96,7 +142,7 @@ const NodeSelector = ({ children, onOpenChange, open }: Props) => {
               <div
                 key={nodeType.type}
                 className="w-full justify-start h-auto py-5 px-4 rounded-none cursor-pointer border-l-2 border-transparent hover:border-l-primary"
-                onClick={() => {}}
+                onClick={() => handleNodeSelect(nodeType)}
               >
                 <div className="flex items-center gap-6 w-full overflow-hidden">
                   {typeof Icon == "string" ? (

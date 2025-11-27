@@ -4,6 +4,7 @@ import "./globals.css";
 import { TRPCReactProvider } from "./trpc/client";
 import { Toaster } from "sonner";
 import { NuqsAdapter } from "nuqs/adapters/next/pages";
+import { Provider } from "jotai";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -21,10 +22,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${outfit.className}`}>
         <NuqsAdapter>
-          <TRPCReactProvider>
-            {children}
-            <Toaster position="top-right" />{" "}
-          </TRPCReactProvider>
+          <Provider>
+            <TRPCReactProvider>
+              {children}
+              <Toaster position="top-right" />{" "}
+            </TRPCReactProvider>
+          </Provider>
         </NuqsAdapter>
       </body>
     </html>
